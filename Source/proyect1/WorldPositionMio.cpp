@@ -3,6 +3,8 @@
 
 #include "WorldPositionMio.h"
 
+#include "IDetailTreeNode.h"
+
 // Sets default values for this component's properties
 UWorldPositionMio::UWorldPositionMio()
 {
@@ -19,7 +21,8 @@ void UWorldPositionMio::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	
+	UE_LOG(LogTemp,Warning,TEXT("Esto es un Warning"));
 	
 }
 
