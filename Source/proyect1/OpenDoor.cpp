@@ -2,6 +2,9 @@
 
 
 #include "OpenDoor.h"
+#include "GameFramework/Actor.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 
 // Sets default values for this component's properties
@@ -33,8 +36,15 @@ void UOpenDoor::BeginPlay()
 
 	
 	
-	InitialYaw=GetOwner()->GetActorRotation().Yaw;
-	TargetYaw=InitialYaw+RotationYaw;
+	InicialZeta=GetOwner()->GetActorRotation().Yaw;
+	ObjetivoZeta=InicialZeta+RotationYaw;
+	
+	
+	if (!ActorThatOpenDoor)//si no hay ningún ActorThatOpensDoor (es decir, que sea null) entonces colocamos
+							//el DefaultPawn del primer PlayerController del Juego.
+		{
+		ActorThatOpenDoor=GetWorld()->GetFirstPlayerController()->GetPawn();
+		}
 	// ...
 	
 }
@@ -45,38 +55,65 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	
+
+	if (Presure_Plate->IsOverlappingActor (ActorThatOpenDoor) )//si presionamos el disparador el método IsOverlappingActor
+																//devuelve un booleano de ActorThatOpenDoor
+	{
+		OpenDoor(DeltaTime);
+		InitialTimeOpening_TiempoInicialApertura=GetWorld()->GetTimeSeconds();//obtengo el tiempo que estoy en el disparador
+	}
+	else
+	{
+		/*ClosingDelay_TiempoDeCierre=GetWorld()->GetTimeSeconds();//empiezo a contar
+		if (ClosingDelay_TiempoDeCierre>InitialTimeOpening_TiempoInicialApertura)
+		{
+			CloseDoor(DeltaTime);
+		}*/
+		if (GetWorld()->GetTimeSeconds()>(ClosingDelay_TiempoDeCierre+InitialTimeOpening_TiempoInicialApertura))
+		{
+			CloseDoor(DeltaTime);
+		}
+		
+	}
+
+	
+}
+
+void UOpenDoor::OpenDoor(float DeltaTime)
+{
 	//FRotator CurrentRotation=GetOwner()->GetActorRotation();
 	//UE_LOG(LogTemp,Warning,TEXT("%s"),*CurrentRotation.ToString());
 	// 14 interpolación
 	UE_LOG(LogTemp,Warning,TEXT("%s"),*GetOwner()->GetActorRotation().ToString());
-	UE_LOG(LogTemp,Warning,TEXT("Yaw es ,%f"),GetOwner()->GetActorRotation().Yaw);
+	UE_LOG(LogTemp,Warning,TEXT("Eje zeta es ,%f"),GetOwner()->GetActorRotation().Yaw);
 	// para abrir la puerta
 
 	//apertura de la puerta con lerp, dependiente de la velocidad del equipo
 	//float siguientePasoEnElGiro=FMath::Lerp(GetOwner()->GetActorRotation().Yaw,TargetYaw,0.01f);
+	//apertura de la puerta con lerp, dependiente de la velocidad del equipo, y con DeltaTime se soluciona
+	//float siguientePasoEnElGiro=FMath::Lerp(GetOwner()->GetActorRotation().Yaw,TargetYaw,1.0f*DeltaTime);
 	//FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
 
 	//apertura de la puerta con FInterpConstantTo, dependiente de deltatime, apertura toda al mismo ritmo
 	//float siguientePasoEnElGiro=FMath::FInterpConstantTo(GetOwner()->GetActorRotation().Yaw,TargetYaw,DeltaTime,45);
 	//FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
 
-	//apertura de la puerta con FInterpTo, dependiente de deltatime.
-
-	//Speed=1;
+	//apertura de la puerta con FInterpTo, dependiente de deltatime.	
+	float siguientePasoEnElGiro=FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw,ObjetivoZeta,DeltaTime,Speed_Apertura);
 	
-	float siguientePasoEnElGiro=FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw,TargetYaw,DeltaTime,Speed);
 	
-	//siguientePasoEnElGiro =siguientePasoEnElGiro+InitialYa;
 	
 	FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
 
 	
 	GetOwner()->SetActorRotation(OpenRotationContinua);
+}
 
-	
-
-	
-
-	// ...
+void UOpenDoor::CloseDoor(float DeltaTime)
+{
+	float siguientePasoEnElGiro=FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw,InicialZeta,DeltaTime,Speed_Cierre);
+	FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);	
+	GetOwner()->SetActorRotation(OpenRotationContinua);
 }
 

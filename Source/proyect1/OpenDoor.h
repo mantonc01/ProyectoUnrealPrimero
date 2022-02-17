@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/TriggerVolume.h"
 #include "OpenDoor.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -23,17 +25,31 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)//para mostrar el elemento en el editor
 	float RotationYaw=90.0;
-	float TargetYaw=0;//po
-	float InitialYaw=0;
+	
+	float ObjetivoZeta=0;//po
+	float InicialZeta=0;
+	
+	UPROPERTY(EditAnywhere)
+	float Speed_Apertura=1;
 
 	UPROPERTY(EditAnywhere)
-	float Speed=1;
-	
+	ATriggerVolume* Presure_Plate;//para introducir un disparador
 
-		
+	virtual void OpenDoor(float DeltaTime);
+	virtual void CloseDoor(float DeltaTime);
+
+	UPROPERTY(EditAnywhere)
+	AActor* ActorThatOpenDoor;//actor que abre la puerta
+
+	float InitialTimeOpening_TiempoInicialApertura=0;
+	UPROPERTY(EditAnywhere)
+	float ClosingDelay_TiempoDeCierre=0;
+	UPROPERTY(EditAnywhere)
+	float Speed_Cierre=1;
 };
