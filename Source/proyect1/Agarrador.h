@@ -36,4 +36,7 @@ private:
 	void SetupInputComponet();
 
 	FHitResult FuncionesAgarrar() const;
+
+	FVector GetObjetosQueAlcanzo() const;
+	FVector GetPlayerWorldPosition() const;
 };

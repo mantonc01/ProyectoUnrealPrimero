@@ -52,4 +52,12 @@ private:
 	float ClosingDelay_TiempoDeCierre=0;
 	UPROPERTY(EditAnywhere)
 	float Speed_Cierre=1;
+
+	UPROPERTY(EditAnywhere)
+	float OpeningMass=50.0f;
+
+
+	UPROPERTY(EditAnywhere)
+	float TotalMassOfActorInVolume;
+	
 };

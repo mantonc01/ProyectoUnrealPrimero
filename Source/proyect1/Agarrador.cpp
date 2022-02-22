@@ -17,7 +17,7 @@ UAgarrador::UAgarrador()
 }
 
 
-// Called when the game starts
+// Called when the game starts, se ejecuta al inicio
 void UAgarrador::BeginPlay()
 {
 	Super::BeginPlay();
@@ -71,36 +71,72 @@ void UAgarrador::SetupInputComponet()
 // metodo que se ejecuta cada frame
 void UAgarrador::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);	
-	
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	/*//obtengo la vista de defaultpawn_BP
+	FVector LocalizacionVistaDelJugador;
+	FRotator RotacionVistaDelJugador;	
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
+	// dibujamos una linea que vaya desde el jugador hasta una distancia(Reach"alcance de la linea") en función de su rotación
+	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);*/
+
+	if (PhysicsHandle->GrabbedComponent)// si tenemos algo agarrado
+	{
+		PhysicsHandle->SetTargetLocation(GetObjetosQueAlcanzo());
+		
+	}
 	// ...
 }
 
 
 void UAgarrador::Agarrar()
-{	
+{
+
+	/*//obtengo la vista de defaultpawn_BP
+	FVector LocalizacionVistaDelJugador;
+	FRotator RotacionVistaDelJugador;	
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
+	// dibujamos una linea que vaya desde el jugador hasta una distancia(Reach"alcance de la linea") en función de su rotación
+	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);*/
+
+
+	
 	UE_LOG(LogTemp,Error,TEXT("He pulsado la tecla agarrar, "));
 	//he refactorizado y me lo llevo a otro método llamado FuncionesAgarrar()
 	FHitResult HitResultado=FuncionesAgarrar();
+	
+	if (HitResultado.GetActor())//tengo algo agarrado?
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Estás mirando a %s"), *HitResultado.GetActor()->GetName());
+		UPrimitiveComponent* ComponenteAgarrar=HitResultado.GetComponent();
+		PhysicsHandle-> GrabComponentAtLocation(ComponenteAgarrar,NAME_None,GetObjetosQueAlcanzo());
+	}
 }
+
+void UAgarrador::Soltar()
+{    	
+	UE_LOG(LogTemp,Error,TEXT("He soltado lo que agarré, "));
+	PhysicsHandle->ReleaseComponent();
+}
+
 
 FHitResult UAgarrador:: FuncionesAgarrar()const
 {
-	//obtengo la vista de defaultpawn_BP
+
+	/*//obtengo la vista de defaultpawn_BP
 	FVector LocalizacionVistaDelJugador;
 	FRotator RotacionVistaDelJugador;
-	
-	
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
-
 	// dibujamos una linea que vaya desde el jugador hasta una distancia(Reach"alcance de la linea") en función de su rotación
-	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);
+	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);*/
+
+	
 	
 	//UE_LOG(LogTemp,Warning,TEXT("AlcanceY, %s"),*LocalizacionVistaDelJugador.ToString());
 
 	DrawDebugLine(GetWorld(),
-		LocalizacionVistaDelJugador,
-		LineTraceEnd,
+		GetPlayerWorldPosition(),
+		GetObjetosQueAlcanzo(),
 		FColor(0,255,0),
 		false,
 		0,
@@ -120,8 +156,8 @@ FHitResult UAgarrador:: FuncionesAgarrar()const
 	//lanzamos el rayCast
 	GetWorld()->LineTraceSingleByObjectType(
 	Hit,//un parametro de salida de tipo hit (lo definimos arriba)
-	LocalizacionVistaDelJugador,//inicio del ray-casting
-	LineTraceEnd,//final del ray casting
+	GetPlayerWorldPosition(),//inicio del ray-casting
+	GetObjetosQueAlcanzo(),//final del ray casting
 	FCollisionObjectQueryParams(ECC_PhysicsBody), //colisionamos con los elementos que esten en el canal physicsBody
 	TraceParams
 	);
@@ -138,9 +174,30 @@ FHitResult UAgarrador:: FuncionesAgarrar()const
 	return Hit;
 }
 
+FVector UAgarrador::GetObjetosQueAlcanzo() const
+{
+	//obtengo la vista de defaultpawn_BP
+	FVector LocalizacionVistaDelJugador;
+	FRotator RotacionVistaDelJugador;
+	
+	
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
 
-void UAgarrador::Soltar()
-{    	
-	UE_LOG(LogTemp,Error,TEXT("He soltado lo que agarré, "));
+	// dibujamos una linea que vaya desde el jugador hasta una distancia(Reach"alcance de la linea") en función de su rotación
+	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);
+	return LineTraceEnd;
 }
+
+FVector UAgarrador :: GetPlayerWorldPosition() const
+{
+	//obtengo la vista de defaultpawn_BP
+	FVector LocalizacionVistaDelJugador;
+	FRotator RotacionVistaDelJugador;
+		
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
+
+	return LocalizacionVistaDelJugador;
+}
+
+
 

@@ -22,29 +22,18 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	//FRotator CurrentRotation=GetOwner()->GetActorRotation();
-
-	//UE_LOG(LogTemp,Warning,TEXT("%s"),*CurrentRotation.ToString());
-
-	
-	//ej 15
-	//FRotator OpenRotation(0.0f,90.0f,0.0f);
-	
-	//GetOwner()->SetActorRotation(OpenRotation);
-
-	//ej 16
-
-	
-	
+		
 	InicialZeta=GetOwner()->GetActorRotation().Yaw;
 	ObjetivoZeta=InicialZeta+RotationYaw;
 	
 	
+	/*
 	if (!ActorThatOpenDoor)//si no hay ningún ActorThatOpensDoor (es decir, que sea null) entonces colocamos
 							//el DefaultPawn del primer PlayerController del Juego.
 		{
 		ActorThatOpenDoor=GetWorld()->GetFirstPlayerController()->GetPawn();
 		}
+	*/
 	// ...
 	
 }
@@ -54,11 +43,11 @@ void UOpenDoor::BeginPlay()
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	
-
-	if (Presure_Plate->IsOverlappingActor (ActorThatOpenDoor) )//si presionamos el disparador el método IsOverlappingActor
-																//devuelve un booleano de ActorThatOpenDoor
+	/*if (Presure_Plate->IsOverlappingActor (ActorThatOpenDoor) )//si presionamos el disparador el método IsOverlappingActor
+																//devuelve un booleano de ActorThatOpenDoor*/
+	
+	if (Presure_Plate && TotalMassOfActorInVolume > OpeningMass )
 	{
 		OpenDoor(DeltaTime);
 		InitialTimeOpening_TiempoInicialApertura=GetWorld()->GetTimeSeconds();//obtengo el tiempo que estoy en el disparador
