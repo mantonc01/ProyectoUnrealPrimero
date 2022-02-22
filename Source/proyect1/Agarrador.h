@@ -29,9 +29,11 @@ private:
 	UPhysicsHandleComponent* PhysicsHandle=nullptr;
 	UInputComponent* InputComponet=nullptr;
 
-	void Agarrar();
+	void Agarrar();	
 	void Soltar();
 
 	void FindPhysicsHandle();
 	void SetupInputComponet();
+
+	FHitResult FuncionesAgarrar() const;
 };

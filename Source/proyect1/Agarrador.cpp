@@ -25,27 +25,10 @@ void UAgarrador::BeginPlay()
 	FindPhysicsHandle();//chequeo el physic handle componente de defaultpawn
 
 	SetupInputComponet();//compruebo el funcionamiento del inputcomponent
-	
-
-	
-
-	InputComponet ->BindAction(
-	"agarrar",//nombre de la accion
-	IE_Pressed,// cuando presiono
-	this,//llamo a esta clase
-	&UAgarrador::Agarrar
-	);
-
-	InputComponet ->BindAction(
-	"agarrar",//nombre de la accion
-	IE_Released,// cuando suelto
-	this,//llamo a esta clase
-	&UAgarrador::Soltar
-	);
-
 	// ...
 	
 }
+
 //chequeo el physic handle componente
 void UAgarrador::FindPhysicsHandle()
 {	
@@ -64,26 +47,45 @@ void UAgarrador::SetupInputComponet()
 
 	if (InputComponet)
 	{
-		UE_LOG(LogTemp,Error,TEXT("Está el UInputComponent_InputComponet dentro de, %s"),*GetOwner()->GetName());
+		//UE_LOG(LogTemp,Error,TEXT("Está el UInputComponent_InputComponet dentro de, %s"),*GetOwner()->GetName());
+		InputComponet ->BindAction(
+		"agarrar",//nombre de la accion
+		IE_Pressed,// cuando presiono
+		this,//llamo a esta clase
+		&UAgarrador::Agarrar
+		);
+
+		InputComponet ->BindAction(
+		"agarrar",//nombre de la accion
+		IE_Released,// cuando suelto
+		this,//llamo a esta clase
+		&UAgarrador::Soltar
+		);
 	}
-	else
-	{
-		UE_LOG(LogTemp,Error,TEXT("No se encuentra el UInputComponent_InputComponet dentro de, %s"),*GetOwner()->GetName());
-	}	
+	
+
+	
 }
 
 
-// Called every frame
+// metodo que se ejecuta cada frame
 void UAgarrador::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);	
 	
 	// ...
 }
+
+
 void UAgarrador::Agarrar()
-{
-	
+{	
 	UE_LOG(LogTemp,Error,TEXT("He pulsado la tecla agarrar, "));
+	//he refactorizado y me lo llevo a otro método llamado FuncionesAgarrar()
+	FHitResult HitResultado=FuncionesAgarrar();
+}
+
+FHitResult UAgarrador:: FuncionesAgarrar()const
+{
 	//obtengo la vista de defaultpawn_BP
 	FVector LocalizacionVistaDelJugador;
 	FRotator RotacionVistaDelJugador;
@@ -91,11 +93,7 @@ void UAgarrador::Agarrar()
 	
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(LocalizacionVistaDelJugador,RotacionVistaDelJugador);
 
-	/*UE_LOG(LogTemp,Warning,TEXT("%s"),*LocalizacionVistaDelJugador.ToString());
-	UE_LOG(LogTemp,Warning,TEXT("%s"),*RotacionVistaDelJugador.ToString());*/
-	
 	// dibujamos una linea que vaya desde el jugador hasta una distancia(Reach"alcance de la linea") en función de su rotación
-
 	FVector LineTraceEnd= LocalizacionVistaDelJugador + (RotacionVistaDelJugador.Vector()*AlcanceY);
 	
 	//UE_LOG(LogTemp,Warning,TEXT("AlcanceY, %s"),*LocalizacionVistaDelJugador.ToString());
@@ -111,7 +109,7 @@ void UAgarrador::Agarrar()
 
 	//raycast hasta una determinada distancia
 
-	FHitResult Hit;// informacion sobre el golpeo del Ray-tracing
+	FHitResult Hit;// aqui se almacena informacion sobre el golpeo del Ray-tracing
 
 	FCollisionQueryParams TraceParams(//parametros para el ray-tracing
 		FName(""),//si los objetos que hacemos ray tracin son los que tengan algun tag(no en nuestro caso, luego vacio)
@@ -119,7 +117,8 @@ void UAgarrador::Agarrar()
 		GetOwner()//nos ignoramos a nosotros (defaultpawn_bp)
 		);
 
-	bool HasImpactado = GetWorld()->LineTraceSingleByObjectType(//lanzamos el ray tracing
+	//lanzamos el rayCast
+	GetWorld()->LineTraceSingleByObjectType(
 	Hit,//un parametro de salida de tipo hit (lo definimos arriba)
 	LocalizacionVistaDelJugador,//inicio del ray-casting
 	LineTraceEnd,//final del ray casting
@@ -127,18 +126,21 @@ void UAgarrador::Agarrar()
 	TraceParams
 	);
 
+	//actor contra el que choca el raycast
 	AActor* ActorContraElQueImpactaElRaycast=Hit.GetActor();
 
 	
-	if (HasImpactado)
-	{
-		
+	if (ActorContraElQueImpactaElRaycast)
+	{		
 		UE_LOG(LogTemp,Warning,TEXT("El raycast choca con , %s"),*ActorContraElQueImpactaElRaycast->GetName());
 	}
+	
+	return Hit;
 }
+
+
 void UAgarrador::Soltar()
-{
-    	
+{    	
 	UE_LOG(LogTemp,Error,TEXT("He soltado lo que agarré, "));
 }
 
