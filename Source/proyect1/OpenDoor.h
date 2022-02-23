@@ -21,6 +21,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	float TotalMassOfActorsInVolume() const;
 
 public:	
 	// Called every frame
@@ -39,13 +40,13 @@ private:
 	float Speed_Apertura=1;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* Presure_Plate;//para introducir un disparador
+	ATriggerVolume* Presure_Plate=nullptr;;//para introducir un disparador
 
 	virtual void OpenDoor(float DeltaTime);
 	virtual void CloseDoor(float DeltaTime);
 
 	UPROPERTY(EditAnywhere)
-	AActor* ActorThatOpenDoor;//actor que abre la puerta
+	AActor* ActorThatOpenDoor=nullptr;;//actor que abre la puerta
 
 	float InitialTimeOpening_TiempoInicialApertura=0;
 	UPROPERTY(EditAnywhere)
@@ -55,9 +56,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float OpeningMass=50.0f;
-
-
-	UPROPERTY(EditAnywhere)
-	float TotalMassOfActorInVolume;
+	
 	
 };

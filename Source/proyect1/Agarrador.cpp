@@ -109,14 +109,22 @@ void UAgarrador::Agarrar()
 	{
 		UE_LOG(LogTemp,Warning,TEXT("Estás mirando a %s"), *HitResultado.GetActor()->GetName());
 		UPrimitiveComponent* ComponenteAgarrar=HitResultado.GetComponent();
-		PhysicsHandle-> GrabComponentAtLocation(ComponenteAgarrar,NAME_None,GetObjetosQueAlcanzo());
+		if (PhysicsHandle)
+		{
+			PhysicsHandle-> GrabComponentAtLocation(ComponenteAgarrar,NAME_None,GetObjetosQueAlcanzo());
+		}
+		
 	}
 }
 
 void UAgarrador::Soltar()
 {    	
 	UE_LOG(LogTemp,Error,TEXT("He soltado lo que agarré, "));
-	PhysicsHandle->ReleaseComponent();
+	if (PhysicsHandle)
+	{
+		PhysicsHandle->ReleaseComponent();
+	}
+	
 }
 
 

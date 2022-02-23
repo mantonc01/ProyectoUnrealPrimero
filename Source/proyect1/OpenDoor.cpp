@@ -27,17 +27,33 @@ void UOpenDoor::BeginPlay()
 	ObjetivoZeta=InicialZeta+RotationYaw;
 	
 	
-	/*
-	if (!ActorThatOpenDoor)//si no hay ningún ActorThatOpensDoor (es decir, que sea null) entonces colocamos
-							//el DefaultPawn del primer PlayerController del Juego.
-		{
-		ActorThatOpenDoor=GetWorld()->GetFirstPlayerController()->GetPawn();
-		}
-	*/
-	// ...
 	
 }
 
+float UOpenDoor:: TotalMassOfActorsInVolume() const
+{
+	TArray <AActor*> OverlappingActors;
+
+	if (Presure_Plate)
+	{
+		Presure_Plate->GetOverlappingActors(OverlappingActors);
+	}
+	
+	
+	float MassAcumaltor=0;
+	for (int i=0;i<OverlappingActors.Num();i++)
+	{
+		//con esto se suma la masa de cada objeto o actor
+		UPrimitiveComponent* ActorWithPrimitiveComponent= OverlappingActors[i]->FindComponentByClass<UPrimitiveComponent>();
+		
+		if (ActorWithPrimitiveComponent)
+		{
+			MassAcumaltor += ActorWithPrimitiveComponent->GetMass();
+		}
+		
+	}
+	return MassAcumaltor;
+}
 
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -46,8 +62,9 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	
 	/*if (Presure_Plate->IsOverlappingActor (ActorThatOpenDoor) )//si presionamos el disparador el método IsOverlappingActor
 																//devuelve un booleano de ActorThatOpenDoor*/
+
 	
-	if (Presure_Plate && TotalMassOfActorInVolume > OpeningMass )
+	if (Presure_Plate && TotalMassOfActorsInVolume() > OpeningMass )
 	{
 		OpenDoor(DeltaTime);
 		InitialTimeOpening_TiempoInicialApertura=GetWorld()->GetTimeSeconds();//obtengo el tiempo que estoy en el disparador
