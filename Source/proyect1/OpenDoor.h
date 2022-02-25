@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Engine/TriggerVolume.h"
+#include "Components/BoxComponent.h"
 #include "OpenDoor.generated.h"
 
 
@@ -39,8 +39,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	float Speed_Apertura=1;
 
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume* Presure_Plate=nullptr;;//para introducir un disparador
+	
+	
+	
+
+	//para introducir un disparador
 
 	virtual void OpenDoor(float DeltaTime);
 	virtual void CloseDoor(float DeltaTime);
@@ -50,12 +53,28 @@ private:
 
 	float InitialTimeOpening_TiempoInicialApertura=0;
 	UPROPERTY(EditAnywhere)
-	float ClosingDelay_TiempoDeCierre=0;
+	float ClosingDelay_TiempoDeCierre=1;
 	UPROPERTY(EditAnywhere)
 	float Speed_Cierre=1;
 
 	UPROPERTY(EditAnywhere)
 	float OpeningMass=50.0f;
 	
+	UPROPERTY(EditAnywhere)
+	UAudioComponent* ComponenteSonidoPuerta=nullptr;
+
+	bool PuertaAbierta=false;
 	
+	UPROPERTY(EditAnywhere)
+	USoundBase* SonidoAbrirPuerta=nullptr;
+	UPROPERTY(EditAnywhere)
+	USoundBase* SonidoCerrarPuerta=nullptr;
+
+	UMeshComponent* DoorMesh=nullptr;
+	
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* Presure_Plate=nullptr;
+
+	UPROPERTY(EditAnywhere)
+	FString OpenerTag="DoorOpener";
 };

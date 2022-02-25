@@ -2,6 +2,8 @@
 
 
 #include "OpenDoor.h"
+
+#include "Components/AudioComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
@@ -22,11 +24,26 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-		
-	InicialZeta=GetOwner()->GetActorRotation().Yaw;
+	DoorMesh=Cast<UMeshComponent>(GetOwner()->GetDefaultSubobjectByName("SM_Door"));
+
+	
+	
+	InicialZeta=DoorMesh->GetComponentRotation().Yaw;
+	
 	ObjetivoZeta=InicialZeta+RotationYaw;
 	
+	ComponenteSonidoPuerta=GetOwner()->FindComponentByClass<UAudioComponent>();
+
 	
+	Presure_Plate=GetOwner()->FindComponentByClass<UBoxComponent>();
+	if (!Presure_Plate)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("no encuentro Presure_Plate"));
+	}
+
+	
+	
+
 	
 }
 
@@ -41,17 +58,22 @@ float UOpenDoor:: TotalMassOfActorsInVolume() const
 	
 	
 	float MassAcumaltor=0;
-	for (int i=0;i<OverlappingActors.Num();i++)
-	{
-		//con esto se suma la masa de cada objeto o actor
-		UPrimitiveComponent* ActorWithPrimitiveComponent= OverlappingActors[i]->FindComponentByClass<UPrimitiveComponent>();
-		
-		if (ActorWithPrimitiveComponent)
-		{
-			MassAcumaltor += ActorWithPrimitiveComponent->GetMass();
-		}
-		
-	}
+	
+	//si el componente tiene un tag
+	
+		for (int i=0;i<OverlappingActors.Num();i++)
+        	{
+        		//con esto se suma la masa de cada objeto o actor
+        		UPrimitiveComponent* ActorWithPrimitiveComponent= OverlappingActors[i]->FindComponentByClass<UPrimitiveComponent>();
+        		
+        		if (ActorWithPrimitiveComponent && ActorWithPrimitiveComponent->ComponentHasTag(*OpenerTag))
+        		{
+        			MassAcumaltor += ActorWithPrimitiveComponent->GetMass();
+        		}
+        		
+        	}
+	
+	
 	return MassAcumaltor;
 }
 
@@ -68,17 +90,18 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	{
 		OpenDoor(DeltaTime);
 		InitialTimeOpening_TiempoInicialApertura=GetWorld()->GetTimeSeconds();//obtengo el tiempo que estoy en el disparador
+		
+		/*SonidoAbrirPuerta->Play(2);
+		UE_LOG(LogTemp,Warning,TEXT("Sonido abrir Puerta ,%s"),);*/
 	}
 	else
 	{
-		/*ClosingDelay_TiempoDeCierre=GetWorld()->GetTimeSeconds();//empiezo a contar
-		if (ClosingDelay_TiempoDeCierre>InitialTimeOpening_TiempoInicialApertura)
-		{
-			CloseDoor(DeltaTime);
-		}*/
 		if (GetWorld()->GetTimeSeconds()>(ClosingDelay_TiempoDeCierre+InitialTimeOpening_TiempoInicialApertura))
 		{
 			CloseDoor(DeltaTime);
+
+			/*SonidoAbrirPuerta->Play(2);
+			UE_LOG(LogTemp,Warning,TEXT("Sonido abrir Puerta ,%s"),);*/
 		}
 		
 	}
@@ -86,40 +109,47 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	
 }
 
+
 void UOpenDoor::OpenDoor(float DeltaTime)
 {
-	//FRotator CurrentRotation=GetOwner()->GetActorRotation();
-	//UE_LOG(LogTemp,Warning,TEXT("%s"),*CurrentRotation.ToString());
-	// 14 interpolación
-	UE_LOG(LogTemp,Warning,TEXT("%s"),*GetOwner()->GetActorRotation().ToString());
-	UE_LOG(LogTemp,Warning,TEXT("Eje zeta es ,%f"),GetOwner()->GetActorRotation().Yaw);
-	// para abrir la puerta
-
-	//apertura de la puerta con lerp, dependiente de la velocidad del equipo
-	//float siguientePasoEnElGiro=FMath::Lerp(GetOwner()->GetActorRotation().Yaw,TargetYaw,0.01f);
-	//apertura de la puerta con lerp, dependiente de la velocidad del equipo, y con DeltaTime se soluciona
-	//float siguientePasoEnElGiro=FMath::Lerp(GetOwner()->GetActorRotation().Yaw,TargetYaw,1.0f*DeltaTime);
-	//FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
-
-	//apertura de la puerta con FInterpConstantTo, dependiente de deltatime, apertura toda al mismo ritmo
-	//float siguientePasoEnElGiro=FMath::FInterpConstantTo(GetOwner()->GetActorRotation().Yaw,TargetYaw,DeltaTime,45);
-	//FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
-
-	//apertura de la puerta con FInterpTo, dependiente de deltatime.	
-	float siguientePasoEnElGiro=FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw,ObjetivoZeta,DeltaTime,Speed_Apertura);
 	
+	//apertura de la puerta con FInterpTo, dependiente de deltatime.	
+	float siguientePasoEnElGiro=FMath::FInterpTo(DoorMesh->GetComponentRotation().Yaw,ObjetivoZeta,DeltaTime,Speed_Apertura);
 	
 	
 	FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);
-
 	
-	GetOwner()->SetActorRotation(OpenRotationContinua);
+	
+	DoorMesh->SetWorldRotation(OpenRotationContinua);
+	
+	if(!PuertaAbierta)
+	{
+		ComponenteSonidoPuerta->SetSound(SonidoAbrirPuerta);
+		ComponenteSonidoPuerta->Play();
+		UE_LOG(LogTemp,Warning,TEXT("Sonido abrir Puerta ,"));
+		PuertaAbierta=true;		
+		
+	}
+	
 }
 
 void UOpenDoor::CloseDoor(float DeltaTime)
 {
-	float siguientePasoEnElGiro=FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw,InicialZeta,DeltaTime,Speed_Cierre);
+	float siguientePasoEnElGiro=FMath::FInterpTo(DoorMesh->GetComponentRotation().Yaw,InicialZeta,DeltaTime,Speed_Cierre);
 	FRotator OpenRotationContinua(0.0f,siguientePasoEnElGiro,0.0f);	
-	GetOwner()->SetActorRotation(OpenRotationContinua);
+	
+	DoorMesh->SetWorldRotation(OpenRotationContinua);
+	UE_LOG(LogTemp,Warning,TEXT("estoy cerrando"));
+	if(PuertaAbierta)
+	{
+		ComponenteSonidoPuerta->SetSound(SonidoCerrarPuerta);
+		ComponenteSonidoPuerta->Play();
+		UE_LOG(LogTemp,Warning,TEXT("Sonido cerrar Puerta "));
+		PuertaAbierta=false;	
+		
+	}
+	
+
+	
 }
 
