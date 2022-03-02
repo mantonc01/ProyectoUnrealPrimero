@@ -70,6 +70,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundBase* SonidoCerrarPuerta=nullptr;
 
+	UPROPERTY()
 	UMeshComponent* DoorMesh=nullptr;
 	
 	UPROPERTY(EditAnywhere)

@@ -26,7 +26,10 @@ private:
 	UPROPERTY(EditAnywhere)//para mostrar el elemento en el editor
 	float AlcanceY=100.0;
 
+	UPROPERTY()
 	UPhysicsHandleComponent* PhysicsHandle=nullptr;
+	
+	UPROPERTY()
 	UInputComponent* InputComponet=nullptr;
 
 	void Agarrar();	
